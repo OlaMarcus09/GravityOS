@@ -45,16 +45,6 @@
     outline-offset: 3px;
   }
 
-  /* NAVIGATION */
-  nav {
-    position: sticky; top: 0; z-index: 50;
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 20px 6vw;
-    background: rgba(9, 7, 16, 0.7);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--line);
-  }
   .wordmark {
     font-family: 'Space Grotesk', sans-serif;
     font-weight: 500; font-size: 14px;
@@ -511,7 +501,7 @@
 </footer>
 
 <script>
-  // Pain list reveal
+  // --- UI Animations (Scroll to view) ---
   const painItems = document.querySelectorAll('.pain-list li');
   const io = new IntersectionObserver((entries)=>{
     entries.forEach((e,i)=>{
@@ -523,7 +513,6 @@
   }, {threshold: 0.2});
   painItems.forEach(el=>io.observe(el));
 
-  // Gravity Score gauge animate on view
   const gaugeCircle = document.getElementById('gaugeCircle');
   const gaugeVal = document.getElementById('gaugeVal');
   let gaugeAnimated = false;
@@ -532,7 +521,7 @@
       if(e.isIntersecting && !gaugeAnimated){
         gaugeAnimated = true;
         const target = 84;
-        const circumference = 628.3; // 2 * pi * 100
+        const circumference = 628.3; 
         const offset = circumference - (circumference * target/100);
         gaugeCircle.style.transition = 'stroke-dashoffset 1.8s cubic-bezier(0.2, 0.8, 0.2, 1)';
         gaugeCircle.style.strokeDashoffset = offset;
@@ -559,7 +548,6 @@
   }, {threshold: 0.5});
   gaugeIo.observe(document.querySelector('.score-block'));
 
-  // Waitlist counter tick
   let count = 1247;
   const counterNum = document.getElementById('counterNum');
   setInterval(()=>{
@@ -567,21 +555,61 @@
     counterNum.textContent = count.toLocaleString();
   }, 4500);
 
-  // Frontend Fake Submit - Replace this with actual API call
+
+  // --- Supabase Database Connection ---
+  
+  // Replace these with your actual Supabase project details
+  const SUPABASE_URL = 'https://pcnnmsamirwmbwmfbeld.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBjbm5tc2FtaXJ3bWJ3bWZiZWxkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxMzg4MDYsImV4cCI6MjA5OTcxNDgwNn0.NRSJ9Hcc-G-mgzAwYS1IKOhmGHKFFKcSgDJtqQE6Bec';
+
   function handleSubmit(formId, confirmId){
     const form = document.getElementById(formId);
     if(!form) return;
-    form.addEventListener('submit', function(e){
+    
+    form.addEventListener('submit', async function(e){
       e.preventDefault(); 
-      // Replace with fetch() call to your backend
-      const confirmEl = document.getElementById(confirmId);
-      form.style.display = 'none';
-      confirmEl.classList.add('show');
+      
+      const emailInput = form.querySelector('input[type="email"]');
+      const submitBtn = form.querySelector('button[type="submit"]');
+      const originalBtnText = submitBtn.innerHTML;
+      
+      // Update UI to show loading state
+      submitBtn.innerHTML = 'Joining...';
+      submitBtn.disabled = true;
+
+      try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/waitlist`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({ email: emailInput.value })
+        });
+
+        // If successful, or if they are already on the list (409 Conflict)
+        if (response.ok || response.status === 409) {
+          const confirmEl = document.getElementById(confirmId);
+          form.style.display = 'none';
+          confirmEl.classList.add('show');
+        } else {
+          throw new Error('Failed to save to database');
+        }
+      } catch (error) {
+        console.error('Error submitting email:', error);
+        alert('Something went wrong. Please check your connection and try again.');
+        // Reset button so they can try again
+        submitBtn.innerHTML = originalBtnText;
+        submitBtn.disabled = false;
+      }
     });
   }
+
+  // Initialize both forms
   handleSubmit('heroForm','heroConfirm');
   handleSubmit('finalForm','finalConfirm');
 </script>
-
 </body>
 </html>
