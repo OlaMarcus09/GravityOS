@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gravity OS — The operating system for creative careers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Newsreader:ital,wght@0,300;0,400;0,500;1,300;1,400&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --void: #090710;
+    --surface: rgba(23, 18, 40, 0.4);
+    --surface-2: rgba(29, 24, 50, 0.6);
+    --pull: #E3A445;
+    --pull-dim: #B9812F;
+    --orbit: #8B7FD1;
+    --signal: #FDFCFB;
+    --muted: #8F8A9F;
+    --line: rgba(255, 255, 255, 0.06);
+    --glass-border: rgba(255, 255, 255, 0.08);
+  }
+  
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+  
+  body {
+    background-color: var(--void);
+    background-image: 
+      radial-gradient(circle at 15% 20%, rgba(227, 164, 69, 0.03), transparent 30%),
+      radial-gradient(circle at 85% 60%, rgba(139, 127, 209, 0.03), transparent 30%);
+    background-attachment: fixed;
+    color: var(--signal);
+    font-family: 'Newsreader', serif;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  ::selection { background: var(--pull); color: var(--void); }
+  a { color: inherit; text-decoration: none; }
+  .display { font-family: 'Space Grotesk', sans-serif; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  a:focus-visible, button:focus-visible, input:focus-visible {
+    outline: 2px solid var(--pull);
+    outline-offset: 3px;
+  }
+
+  /* ORBIT SPINE */
+  .spine-wrap {
+    position: fixed; left: 50%; top: 0; bottom: 0; width: 1px;
+    transform: translateX(-50%); z-index: 0; pointer-events: none;
+  }
+  .spine-wrap svg { position: absolute; top: 0; left: 0; height: 100%; width: 1px; overflow: visible; }
+  .spine-line {
+    stroke: var(--orbit); stroke-width: 1; fill: none; opacity: 0.2;
+    stroke-dasharray: 2 4; vector-effect: non-scaling-stroke;
+  }
+  .spine-progress {
+    stroke: var(--pull); stroke-width: 1.5; fill: none; opacity: 0.8;
+    stroke-dasharray: 6000; stroke-dashoffset: 6000;
+    vector-effect: non-scaling-stroke;
+    transition: stroke-dashoffset 0.15s cubic-bezier(0.2, 0, 0, 1);
+  }
+
+  /* NAVIGATION */
+  nav {
+    position: sticky; top: 0; z-index: 50;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 20px 6vw;
+    background: rgba(9, 7, 16, 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--line);
+  }
+  .wordmark {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500; font-size: 14px;
+    letter-spacing: 0.2em; text-transform: uppercase;
+  }
+  .wordmark span { color: var(--pull); font-weight: 700; }
+  
+  .nav-cta {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+    background: transparent; border: 1px solid var(--glass-border); color: var(--signal);
+    padding: 10px 22px; border-radius: 999px; cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  .nav-cta:hover {
+    border-color: var(--pull);
+    background: rgba(227, 164, 69, 0.05);
+    box-shadow: 0 0 15px rgba(227, 164, 69, 0.1);
+  }
+
+  section {
+    position: relative; z-index: 1; max-width: 760px;
+    margin: 0 auto; padding: min(12vw, 140px) 7vw min(8vw, 100px);
+  }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted);
+    display: flex; align-items: center; gap: 12px; margin-bottom: 24px;
+  }
+  .eyebrow::before {
+    content: ""; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--pull); box-shadow: 0 0 10px rgba(227, 164, 69, 0.8);
+  }
+
+  /* HERO */
+  .hero { padding-top: min(10vw, 100px); text-align: left; max-width: 1140px; }
+  .hero-grid { display: flex; align-items: center; gap: 64px; }
+  .hero-copy { flex: 1 1 500px; min-width: 0; }
+  .hero-visual { flex: 0 0 440px; width: 440px; height: 440px; position: relative; margin: 0 auto; }
+  
+  h1 {
+    font-family: 'Space Grotesk', sans-serif; font-weight: 500;
+    font-size: clamp(2.4rem, 5vw, 4rem); line-height: 1.05; letter-spacing: -0.03em;
+  }
+  h1 .accent {
+    color: transparent;
+    background: linear-gradient(135deg, #F0B563, #B9812F);
+    -webkit-background-clip: text;
+  }
+
+  .hero-sub {
+    font-family: 'Newsreader', serif; font-style: italic; font-weight: 300;
+    font-size: clamp(1.1rem, 2.4vw, 1.4rem); color: var(--muted);
+    max-width: 48ch; margin: 24px 0 44px; line-height: 1.6;
+  }
+
+  .waitlist-form { display: flex; gap: 12px; max-width: 460px; flex-wrap: wrap; }
+  .waitlist-form input[type=email] {
+    flex: 1 1 240px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--glass-border);
+    color: var(--signal); font-family: 'JetBrains Mono', monospace; font-size: 14px;
+    padding: 16px 20px; border-radius: 10px;
+    transition: all 0.3s ease;
+  }
+  .waitlist-form input[type=email]:focus {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+  .waitlist-form input[type=email]::placeholder { color: #5F5A70; }
+  
+  .btn-pull {
+    font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 14px; letter-spacing: 0.02em;
+    background: linear-gradient(135deg, #E3A445, #D18D27); color: var(--void);
+    border: none; padding: 16px 28px; border-radius: 10px; cursor: pointer;
+    transition: all 0.3s ease; white-space: nowrap;
+    box-shadow: 0 8px 24px rgba(227, 164, 69, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+  }
+  .btn-pull:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(227, 164, 69, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.4); }
+
+  .counter-row {
+    display: flex; align-items: center; gap: 12px; margin-top: 24px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted);
+  }
+  .counter-row .num { color: var(--pull); font-weight: 600; }
+  .dots { display: flex; gap: 4px; }
+  .dots span { width: 4px; height: 4px; border-radius: 50%; background: var(--orbit); opacity: 0.6; }
+
+  /* HERO VISUAL (GLASS ORBS) */
+  .orbit-paths { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .orbit-paths path { fill: none; stroke: var(--orbit); stroke-width: 1; stroke-dasharray: 4 6; opacity: 0.3; }
+  
+  .orb {
+    position: absolute; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.05), 0 20px 40px rgba(0, 0, 0, 0.5);
+    animation: bob 6s ease-in-out infinite;
+  }
+  .orb.hub {
+    width: 150px; height: 150px; left: 145px; top: 145px;
+    background: radial-gradient(circle at 30% 30%, rgba(227, 164, 69, 0.4), rgba(227, 164, 69, 0.1));
+    font-size: 38px; animation-duration: 7s;
+    box-shadow: inset 0 0 30px rgba(227, 164, 69, 0.2), 0 0 50px rgba(227, 164, 69, 0.2), 0 20px 40px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(227, 164, 69, 0.3);
+  }
+  .orb-a { width: 90px; height: 90px; left: 320px; top: 40px; background: rgba(139, 127, 209, 0.15); font-size: 26px; animation-delay: 0.3s; }
+  .orb-b { width: 100px; height: 100px; left: 330px; top: 230px; background: rgba(255, 255, 255, 0.03); font-size: 30px; animation-delay: 0.9s; animation-duration: 5.8s; }
+  .orb-c { width: 94px; height: 94px; left: 20px; top: 260px; background: rgba(227, 164, 69, 0.15); font-size: 28px; animation-delay: 0.5s; animation-duration: 6.2s; }
+  .orb-d { width: 64px; height: 64px; left: 30px; top: 50px; background: rgba(255, 255, 255, 0.03); font-size: 20px; animation-delay: 1.2s; }
+  
+  .dot-accent { position: absolute; border-radius: 50%; background: var(--orbit); box-shadow: 0 0 15px 3px rgba(139, 127, 209, 0.4); }
+  .dot-1 { width: 6px; height: 6px; left: 280px; top: 180px; }
+  .dot-2 { width: 5px; height: 5px; left: 110px; top: 140px; background: var(--pull); box-shadow: 0 0 15px 3px rgba(227, 164, 69, 0.4); }
+  .dot-3 { width: 4px; height: 4px; left: 240px; top: 360px; }
+
+  @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+  
+  @media (max-width: 900px) {
+    .hero-grid { flex-direction: column; gap: 40px; }
+    .hero-visual { flex: 0 0 auto; width: min(340px, 85vw); height: min(340px, 85vw); transform: scale(0.9); }
+    h1 { font-size: clamp(2.2rem, 8vw, 3rem); }
+  }
+
+  /* PAIN */
+  .pain-list { list-style: none; margin-top: 24px; }
+  .pain-list li {
+    font-family: 'Space Grotesk', sans-serif; font-size: clamp(1.2rem, 3vw, 1.6rem);
+    font-weight: 400; padding: 28px 0; border-bottom: 1px solid var(--line);
+    color: var(--signal); opacity: 0; transform: translateY(15px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .pain-list li.in { opacity: 1; transform: translateY(0); }
+  .pain-list li:first-child { border-top: 1px solid var(--line); }
+  .pain-list li .n {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--pull); display: block; margin-bottom: 8px; letter-spacing: 0.1em;
+  }
+
+  h2 {
+    font-family: 'Space Grotesk', sans-serif; font-weight: 500;
+    font-size: clamp(1.8rem, 4vw, 2.6rem); line-height: 1.1; margin-bottom: 24px; letter-spacing: -0.02em;
+  }
+  .lead {
+    font-size: clamp(1.05rem, 2.2vw, 1.2rem); line-height: 1.7; font-weight: 300;
+    color: var(--muted); max-width: 60ch; margin-bottom: 12px;
+  }
+  .lead strong { color: var(--signal); font-weight: 500; }
+
+  /* SOLUTION / GRAVITY SCORE */
+  .score-block {
+    margin-top: 64px; background: var(--surface);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border); border-radius: 24px;
+    padding: clamp(32px, 6vw, 56px); display: flex; flex-direction: column; align-items: center; gap: 40px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 20px 40px rgba(0,0,0,0.3);
+  }
+  .gauge-wrap { position: relative; width: 230px; height: 230px; }
+  .gauge-num { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .gauge-num .v { font-family: 'Space Grotesk', sans-serif; font-size: 56px; font-weight: 600; color: var(--pull); line-height: 1; letter-spacing: -0.03em; }
+  .gauge-num .l { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; margin-top: 8px; }
+  
+  .dims { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 32px; width: 100%; max-width: 500px; margin: 0 auto; }
+  .dim { display: flex; align-items: center; gap: 12px; font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 400; color: var(--muted); }
+  .dim .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 10px currentColor; }
+
+  /* PROOF CARDS */
+  .proof-cards { margin-top: 56px; display: flex; flex-direction: column; gap: 20px; }
+  .p-card {
+    background: var(--surface); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border); border-radius: 20px; padding: 32px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 10px 30px rgba(0,0,0,0.2);
+    transition: transform 0.3s ease, border-color 0.3s ease;
+  }
+  .p-card:hover { border-color: rgba(255, 255, 255, 0.15); transform: translateY(-2px); }
+  
+  .p-card-h { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 24px; }
+  .p-card-h .t { font-family: 'Space Grotesk', sans-serif; font-weight: 500; font-size: 16px; letter-spacing: 0.02em; }
+  .p-card-h .m { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--pull-dim); letter-spacing: 0.05em; }
+  
+  .timeline { display: flex; gap: 6px; align-items: flex-end; height: 60px; }
+  .timeline .bar { flex: 1; background: rgba(255,255,255,0.04); border-radius: 4px 4px 0 0; position: relative; transition: background 0.3s; }
+  .timeline .bar.hit { background: linear-gradient(to top, rgba(227, 164, 69, 0.2), #E3A445); }
+  .timeline-labels { display: flex; justify-content: space-between; margin-top: 10px; font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: var(--muted); opacity: 0.7; }
+  
+  .vault-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .vault-item {
+    aspect-ratio: 1; background: rgba(255,255,255,0.02); border: 1px solid var(--line);
+    border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: var(--muted);
+    text-align: center; padding: 6px; transition: all 0.2s ease;
+  }
+  .vault-item:hover { background: rgba(255,255,255,0.05); color: var(--signal); }
+  
+  .budget-bars { display: flex; flex-direction: column; gap: 14px; }
+  .b-row { display: flex; align-items: center; gap: 16px; }
+  .b-label { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--muted); width: 85px; flex-shrink: 0; }
+  .b-track { flex: 1; height: 4px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; }
+  .b-fill { height: 100%; border-radius: 4px; box-shadow: 0 0 10px currentColor; }
+
+  /* VISION */
+  .mission-quote {
+    font-family: 'Newsreader', serif; font-style: italic; font-weight: 300;
+    font-size: clamp(1.3rem, 3vw, 1.6rem); line-height: 1.5; color: var(--signal);
+    border-left: 2px solid var(--pull); padding-left: 32px; margin: 48px 0 56px;
+    opacity: 0.9;
+  }
+  .roadmap-chips { display: flex; flex-wrap: wrap; gap: 12px; }
+  .chip {
+    font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: #D6D2E6;
+    background: rgba(139, 127, 209, 0.08); border: 1px solid rgba(139, 127, 209, 0.2);
+    padding: 10px 20px; border-radius: 999px; backdrop-filter: blur(4px);
+  }
+  .chip::before { content: "→ "; color: var(--orbit); opacity: 0.7; margin-right: 4px; }
+  .nav-chip { background: transparent; border: none; padding: 0; color: var(--muted); }
+  .nav-chip::before { display: none; }
+
+  /* CTA */
+  .cta-section { text-align: center; padding-bottom: min(16vw, 160px); }
+  .cta-section h2 { font-size: clamp(2rem, 5vw, 3.2rem); margin-bottom: 20px; }
+  .cta-section .lead { margin: 0 auto 44px; text-align: center; max-width: 50ch; }
+  .cta-section .waitlist-form { margin: 0 auto; justify-content: center; }
+  .founding-note { margin-top: 24px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--pull-dim); letter-spacing: 0.02em; }
+
+  footer {
+    position: relative; z-index: 1; text-align: center; padding: 40px 6vw 56px;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted);
+    border-top: 1px solid var(--line); letter-spacing: 0.05em; text-transform: uppercase;
+  }
+
+  .confirm-msg {
+    display: none; font-family: 'JetBrains Mono', monospace; font-size: 12.5px;
+    color: var(--pull); margin-top: 16px; padding: 12px;
+    background: rgba(227, 164, 69, 0.05); border: 1px solid rgba(227, 164, 69, 0.2); border-radius: 8px;
+  }
+  .confirm-msg.show { display: inline-block; }
+
+  @media (prefers-reduced-motion: reduce){
+    html { scroll-behavior: auto; }
+    .pain-list li { transition: none; opacity: 1; transform: none; }
+    .spine-progress { transition: none; }
+    .orb { animation: none; }
+  }
+
+  @media (max-width: 560px){
+    .dims { grid-template-columns: 1fr; }
+    .vault-grid { grid-template-columns: repeat(2, 1fr); }
+    section { padding-left: 7vw; padding-right: 7vw; }
+    .nav-chip { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="spine-wrap">
+  <svg preserveAspectRatio="none" viewBox="0 0 2 100" id="spineSvg">
+    <path class="spine-line" d="M1,0 L1,100" />
+    <path class="spine-progress" id="spineProgress" d="M1,0 L1,100" />
+  </svg>
+</div>
+
+<nav>
+  <div class="wordmark">GRAVITY<span>OS</span></div>
+  <div style="display:flex; gap:16px; align-items:center;">
+    <span class="chip nav-chip">🎵 For independent creatives</span>
+    <button class="nav-cta" onclick="document.getElementById('email-final').focus()">Join waitlist</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid">
+    <div class="hero-copy">
+      <div class="eyebrow">Now boarding — pre-launch</div>
+      <h1>Stop managing chaos.<br>Start running your <span class="accent">career</span>.</h1>
+      <p class="hero-sub">Gravity OS is the operating system for independent artists, producers, and creative teams — plan releases, manage your catalogue, and grow, all from one place.</p>
+      <form class="waitlist-form" id="heroForm">
+        <input type="email" placeholder="you@yourcraft.com" required aria-label="Email address">
+        <button type="submit" class="btn-pull">Join waitlist →</button>
+      </form>
+      <div class="confirm-msg" id="heroConfirm">You're in orbit. We'll email you at launch.</div>
+      <div class="counter-row">
+        <div class="dots"><span></span><span></span><span></span></div>
+        <span><span class="num" id="counterNum">1,247</span> creatives already on the list</span>
+      </div>
+    </div>
+
+    <div class="hero-visual" aria-hidden="true">
+      <svg class="orbit-paths" viewBox="0 0 440 440">
+        <path d="M220,220 C290,150 340,100 370,86"/>
+        <path d="M220,220 C290,240 340,260 388,284"/>
+        <path d="M220,220 C150,250 110,290 78,326"/>
+        <path d="M220,220 C150,170 110,130 65,83"/>
+      </svg>
+      <div class="dot-accent dot-1"></div>
+      <div class="dot-accent dot-2"></div>
+      <div class="dot-accent dot-3"></div>
+      <div class="orb hub">🪐</div>
+      <div class="orb orb-a">🎧</div>
+      <div class="orb orb-b">🎤</div>
+      <div class="orb orb-c">💿</div>
+      <div class="orb orb-d">🎨</div>
+    </div>
+  </div>
+</section>
+
+<!-- PAIN -->
+<section id="pain">
+  <div class="eyebrow">Without structure</div>
+  <h2>Talent doesn't fail. Management does.</h2>
+  <ul class="pain-list">
+    <li><span class="n">01</span>You don't know what deserves your attention today.</li>
+    <li><span class="n">02</span>Deadlines pass before you even saw them coming.</li>
+    <li><span class="n">03</span>Your stems, contracts, and artwork live in six different places.</li>
+    <li><span class="n">04</span>You're the artist and the manager — and no one's managing.</li>
+  </ul>
+</section>
+
+<!-- SOLUTION -->
+<section id="solution">
+  <div class="eyebrow">The reframe</div>
+  <h2>Not another productivity app.<br>An operating system for your career.</h2>
+  <p class="lead">Gravity OS doesn't replace your creativity — it gives it <strong>structure, accountability, and momentum</strong>. At the center of it is a single number that tells you the truth about where your career actually stands.</p>
+
+  <div class="score-block">
+    <div class="gauge-wrap">
+      <svg width="230" height="230" viewBox="0 0 230 230">
+        <circle cx="115" cy="115" r="100" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="10"/>
+        <circle id="gaugeCircle" cx="115" cy="115" r="100" fill="none" stroke="#E3A445" stroke-width="10"
+          stroke-linecap="round" stroke-dasharray="628.3" stroke-dashoffset="628.3"
+          transform="rotate(-90 115 115)"/>
+      </svg>
+      <div class="gauge-num">
+        <div class="v" id="gaugeVal">0</div>
+        <div class="l">Gravity Score™</div>
+      </div>
+    </div>
+    <div class="dims">
+      <div class="dim"><span class="dot" style="background:#E3A445; color:#E3A445"></span>Consistency</div>
+      <div class="dim"><span class="dot" style="background:#8B7FD1; color:#8B7FD1"></span>Organization</div>
+      <div class="dim"><span class="dot" style="background:#E3A445; color:#E3A445"></span>Execution</div>
+      <div class="dim"><span class="dot" style="background:#8B7FD1; color:#8B7FD1"></span>Marketing</div>
+      <div class="dim"><span class="dot" style="background:#E3A445; color:#E3A445"></span>Collaboration</div>
+      <div class="dim"><span class="dot" style="background:#8B7FD1; color:#8B7FD1"></span>Business Readiness</div>
+    </div>
+  </div>
+</section>
+
+<!-- PROOF -->
+<section id="proof">
+  <div class="eyebrow">Built on real workflows</div>
+  <h2>This isn't a concept. It's already mapped.</h2>
+  <p class="lead">Every screen is designed around how releases, catalogues, and budgets actually move — not generic to-do lists.</p>
+
+  <div class="proof-cards">
+    <div class="p-card">
+      <div class="p-card-h"><span class="t">Release Planner</span><span class="m">90 → 0 DAYS</span></div>
+      <div class="timeline">
+        <div class="bar hit" style="height:100%"></div>
+        <div class="bar hit" style="height:82%"></div>
+        <div class="bar" style="height:64%"></div>
+        <div class="bar" style="height:64%"></div>
+        <div class="bar" style="height:46%"></div>
+        <div class="bar" style="height:46%"></div>
+        <div class="bar" style="height:30%"></div>
+        <div class="bar" style="height:16%"></div>
+        <div class="bar" style="height:8%"></div>
+      </div>
+      <div class="timeline-labels"><span>RECORD</span><span>MIX</span><span>MASTER</span><span>ART</span><span>UPLOAD</span></div>
+    </div>
+
+    <div class="p-card">
+      <div class="p-card-h"><span class="t">Catalogue Vault</span><span class="m">12 ACTIVE PROJECTS</span></div>
+      <div class="vault-grid">
+        <div class="vault-item">AUDIO</div>
+        <div class="vault-item">ARTWORK</div>
+        <div class="vault-item">STEMS</div>
+        <div class="vault-item">LYRICS</div>
+        <div class="vault-item">SPLITS</div>
+        <div class="vault-item">BPM/KEY</div>
+        <div class="vault-item">CONTRACTS</div>
+        <div class="vault-item">METADATA</div>
+      </div>
+    </div>
+
+    <div class="p-card">
+      <div class="p-card-h"><span class="t">Budget Planner</span><span class="m">₦850,000 ALLOCATED</span></div>
+      <div class="budget-bars">
+        <div class="b-row"><span class="b-label">RECORDING</span><div class="b-track"><div class="b-fill" style="width:78%;background:#E3A445;color:#E3A445"></div></div></div>
+        <div class="b-row"><span class="b-label">MIX/MASTER</span><div class="b-track"><div class="b-fill" style="width:58%;background:#8B7FD1;color:#8B7FD1"></div></div></div>
+        <div class="b-row"><span class="b-label">ARTWORK</span><div class="b-track"><div class="b-fill" style="width:34%;background:#8B7FD1;color:#8B7FD1"></div></div></div>
+        <div class="b-row"><span class="b-label">MARKETING</span><div class="b-track"><div class="b-fill" style="width:46%;background:#E3A445;color:#E3A445"></div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VISION -->
+<section id="vision">
+  <div class="eyebrow">Where this goes</div>
+  <h2>The mission is bigger than the MVP.</h2>
+  <div class="mission-quote">"To empower one million independent creatives with the systems, tools, and guidance needed to build profitable, organized, and sustainable creative businesses."</div>
+  <p class="lead" style="margin-bottom:28px;">What ships first is the foundation. What's coming next:</p>
+  <div class="roadmap-chips">
+    <span class="chip">AI Creative Manager</span>
+    <span class="chip">Collaboration Workspace</span>
+    <span class="chip">Analytics Dashboard</span>
+    <span class="chip">Funding Hub</span>
+    <span class="chip">Creative Marketplace</span>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="cta">
+  <div class="eyebrow" style="justify-content:center;">Founding members</div>
+  <h2>Be one of the first 500 in orbit.</h2>
+  <p class="lead">Early members lock in founding pricing for life, and shape the roadmap before anyone else sees it.</p>
+  <form class="waitlist-form" id="finalForm">
+    <input type="email" id="email-final" placeholder="you@yourcraft.com" required aria-label="Email address">
+    <button type="submit" class="btn-pull">Join the waitlist</button>
+  </form>
+  <div class="confirm-msg" id="finalConfirm">You're in orbit. We'll email you at launch.</div>
+  <div class="founding-note">No spam. One email when we launch — nothing before.</div>
+</section>
+
+<footer>
+  GRAVITY OS — THE OPERATING SYSTEM FOR CREATIVE CAREERS · © 2026
+</footer>
+
+<script>
+  // Orbit spine scroll progress
+  const spineProgress = document.getElementById('spineProgress');
+  function updateSpine(){
+    const scrollTop = window.scrollY;
+    const docHeight = document.body.scrollHeight - window.innerHeight;
+    const pct = Math.min(scrollTop / docHeight, 1);
+    const len = 6000;
+    spineProgress.style.strokeDasharray = len;
+    spineProgress.style.strokeDashoffset = len - (len * pct);
+  }
+  window.addEventListener('scroll', updateSpine);
+  window.addEventListener('resize', updateSpine);
+  updateSpine();
+
+  // Pain list reveal
+  const painItems = document.querySelectorAll('.pain-list li');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach((e,i)=>{
+      if(e.isIntersecting){
+        setTimeout(()=>e.target.classList.add('in'), i*120);
+        io.unobserve(e.target);
+      }
+    });
+  }, {threshold: 0.2});
+  painItems.forEach(el=>io.observe(el));
+
+  // Gravity Score gauge animate on view
+  const gaugeCircle = document.getElementById('gaugeCircle');
+  const gaugeVal = document.getElementById('gaugeVal');
+  let gaugeAnimated = false;
+  const gaugeIo = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting && !gaugeAnimated){
+        gaugeAnimated = true;
+        const target = 84;
+        const circumference = 628.3; // 2 * pi * 100
+        const offset = circumference - (circumference * target/100);
+        gaugeCircle.style.transition = 'stroke-dashoffset 1.8s cubic-bezier(0.2, 0.8, 0.2, 1)';
+        gaugeCircle.style.strokeDashoffset = offset;
+        let start = 0;
+        const duration = 1800; 
+        const startTime = performance.now();
+        
+        const step = (currentTime)=>{
+          const elapsed = currentTime - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          // Ease out cubic
+          const easeProgress = 1 - Math.pow(1 - progress, 3); 
+          const currentVal = Math.floor(easeProgress * target);
+          
+          gaugeVal.textContent = currentVal;
+          if(progress < 1){
+            requestAnimationFrame(step);
+          } else {
+            gaugeVal.textContent = target;
+          }
+        };
+        requestAnimationFrame(step);
+      }
+    });
+  }, {threshold: 0.5});
+  gaugeIo.observe(document.querySelector('.score-block'));
+
+  // Waitlist counter tick
+  let count = 1247;
+  const counterNum = document.getElementById('counterNum');
+  setInterval(()=>{
+    count += Math.random() > 0.6 ? 1 : 0;
+    counterNum.textContent = count.toLocaleString();
+  }, 4500);
+
+  // Fake form submit handlers
+  function handleSubmit(formId, confirmId){
+    const form = document.getElementById(formId);
+    if(!form) return;
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      const confirmEl = document.getElementById(confirmId);
+      form.style.display = 'none';
+      confirmEl.classList.add('show');
+    });
+  }
+  handleSubmit('heroForm','heroConfirm');
+  handleSubmit('finalForm','finalConfirm');
+</script>
+
+</body>
+</html>
