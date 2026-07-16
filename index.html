@@ -45,6 +45,15 @@
     outline-offset: 3px;
   }
 
+  /* NAVIGATION */
+  nav {
+    position: sticky; top: 0; z-index: 50;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 20px 6vw;
+    background: rgba(9, 7, 16, 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
   .wordmark {
     font-family: 'Space Grotesk', sans-serif;
     font-weight: 500; font-size: 14px;
@@ -287,9 +296,9 @@
 
   /* RESPONSIVE DESIGN FOR MOBILE/TABLET */
   @media (max-width: 900px) {
-    .hero-grid { flex-direction: column-reverse; gap: 20px; text-align: center; }
+    .hero-grid { flex-direction: column; gap: 20px; text-align: center; }
     .hero-copy { padding-top: 20px; }
-    .hero-visual { transform: scale(0.8); margin-top: -30px; }
+    .hero-visual { transform: scale(0.8); margin-top: 10px; }
     .eyebrow { justify-content: center; }
     .hero-sub { margin: 24px auto 44px; }
     .counter-row { justify-content: center; }
@@ -302,7 +311,7 @@
     .hero { padding-top: 60px; }
     
     /* Make visual scale down gracefully without breaking layout */
-    .hero-visual { transform: scale(0.65); margin-top: -60px; margin-bottom: -40px; }
+    .hero-visual { transform: scale(0.65); margin-top: -10px; margin-bottom: -30px; }
     
     /* Stack forms full width on mobile */
     .waitlist-form { flex-direction: column; width: 100%; }
@@ -525,7 +534,6 @@
         const offset = circumference - (circumference * target/100);
         gaugeCircle.style.transition = 'stroke-dashoffset 1.8s cubic-bezier(0.2, 0.8, 0.2, 1)';
         gaugeCircle.style.strokeDashoffset = offset;
-        let start = 0;
         const duration = 1800; 
         const startTime = performance.now();
         
@@ -557,8 +565,6 @@
 
 
   // --- Supabase Database Connection ---
-  
-  // Replace these with your actual Supabase project details
   const SUPABASE_URL = 'https://pcnnmsamirwmbwmfbeld.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBjbm5tc2FtaXJ3bWJ3bWZiZWxkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxMzg4MDYsImV4cCI6MjA5OTcxNDgwNn0.NRSJ9Hcc-G-mgzAwYS1IKOhmGHKFFKcSgDJtqQE6Bec';
 
@@ -573,7 +579,6 @@
       const submitBtn = form.querySelector('button[type="submit"]');
       const originalBtnText = submitBtn.innerHTML;
       
-      // Update UI to show loading state
       submitBtn.innerHTML = 'Joining...';
       submitBtn.disabled = true;
 
@@ -589,7 +594,6 @@
           body: JSON.stringify({ email: emailInput.value })
         });
 
-        // If successful, or if they are already on the list (409 Conflict)
         if (response.ok || response.status === 409) {
           const confirmEl = document.getElementById(confirmId);
           form.style.display = 'none';
@@ -600,14 +604,12 @@
       } catch (error) {
         console.error('Error submitting email:', error);
         alert('Something went wrong. Please check your connection and try again.');
-        // Reset button so they can try again
         submitBtn.innerHTML = originalBtnText;
         submitBtn.disabled = false;
       }
     });
   }
 
-  // Initialize both forms
   handleSubmit('heroForm','heroConfirm');
   handleSubmit('finalForm','finalConfirm');
 </script>
